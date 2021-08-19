@@ -1,0 +1,46 @@
+# Docker installation cmds
+sudo apt update
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+sudo apt update
+sudo apt install docker-ce
+
+# Azure Cli installation cmds
+sudo apt-get update
+sudo apt-get install ca-certificates curl apt-transport-https lsb-release gnupg
+
+curl -sL https://packages.microsoft.com/keys/microsoft.asc |
+    gpg --dearmor |
+    sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+
+AZ_REPO=$(lsb_release -cs)
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" |
+    sudo tee /etc/apt/sources.list.d/azure-cli.list
+
+sudo apt-get update
+sudo apt-get install azure-cli
+
+# to build and push image to acr
+
+sudo docker build -t dotnetapp .
+sudo docker run -d -p 5000:5000 dotnetapp
+sudo az login
+sudo az acr --name=clustername --resource-group=resourcegrpname
+sudo docker tag angularui acrrepo100.azurecr.io/angularui
+sudo docker push acrrepo100.azurecr.io/angularui
+
+# to give access to aks to pull image from acr
+
+az aks update -n cluster -g newrsgrp --attach-acr azureregistry100
+
+# to list images
+sudo docker images
+# to list all the containers
+sudo docker ps -a
+# to remove all the stopped containers
+sudo docker container prune
+# to login into running container
+ sudo docker exec -it a53c6d88b7a4  /bin/bash
+
+
