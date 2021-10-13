@@ -23,16 +23,28 @@ sudo apt-get install azure-cli
 
 # to build and push image to acr
 
-sudo docker build -t dotnetapp .
-sudo docker run -d -p 5000:5000 dotnetapp
+sudo docker build -t angularui .
+sudo docker run -d -p 5000:4200 angularui
 sudo az login
-sudo az acr --name=clustername --resource-group=resourcegrpname
+sudo az acr login --name=acrrepo100
 sudo docker tag angularui acrrepo100.azurecr.io/angularui
 sudo docker push acrrepo100.azurecr.io/angularui
 
-# to give access to aks to pull image from acr
+# to give access to aks to pull image from acr(using managed identity)
 
 az aks update -n cluster -g newrsgrp --attach-acr azureregistry100
+
+# to give access to aks to pull image from acr(using service principle)
+
+#get the client id of the service principle assosiated with aks
+$CLIENT_ID=$(az aks show --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME --query "servicePrincipalProfile.clientId" --output tsv)
+
+# Get the id of the Azure Container registry resource
+$ACR_ID=$(az acr show --name $ACR_NAME --resource-group $ACR_RESOURCE_GROUP --query "id" --output tsv)
+
+# Next you can assign the role
+az role assignment create --assignee $CLIENT_ID --role acrpull --scope $ACR_ID
+
 
 # to list images
 sudo docker images
